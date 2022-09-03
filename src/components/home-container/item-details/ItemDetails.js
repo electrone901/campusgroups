@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router'
+import React, { useState } from 'react'
 import Grid from '@material-ui/core/Grid'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
@@ -7,134 +6,41 @@ import Button from '@material-ui/core/Button'
 import FavoriteIcon from '@material-ui/icons/Favorite'
 import ShareIcon from '@material-ui/icons/Share'
 import Card from '@material-ui/core/Card'
-import Checkbox from '@material-ui/core/Checkbox'
 import { Link } from 'react-router-dom'
 import { StylesProvider } from '@material-ui/core/styles'
-import {
-  TextField,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  IconButton,
-} from '@material-ui/core'
-// import DirectionImg from '../../../src/components/images/directions.png'
+import { IconButton } from '@material-ui/core'
 import './ItemDetails.css'
 import detailsImg from '../../../images/details.png'
+import imageHolder from '../../../images/imageHolder.jpg'
 import { CircularStatic } from '../../commons/CircularProgressWithLabel'
-// import SeeMoreWork from '../unlock-work/UnlockWork'
+import { WorldIDWidget } from '@worldcoin/id'
 
-function ItemDetails({ account, contractData, selectedItem }) {
-  console.log('my selectedItem', selectedItem)
-  const { recipeId } = useParams()
-  const [recipe, setRecipe] = useState('')
-  const [image, setImage] = useState([])
-  const [petName, setPetName] = useState([])
-  const [petOwner, setOwnerName] = useState([])
-  const [petCategory, setPetCategory] = useState([])
-  const [petTransactions, setpetTransactions] = useState([])
+function ItemDetails({ account, contract, selectedItem }) {
+  console.log('SelectedItem', selectedItem)
+  console.log(
+    'selectedItem.contractData.isSold',
+    selectedItem.contractData.isSold,
+  )
   const [comment, setComment] = useState('')
   const [codeHash, setCodeHash] = useState('')
-
   const [loading, setLoading] = useState(false)
-  const [unlock, setUnlock] = useState(false)
-
-  useEffect(() => {
-    const getImage = (ipfsURL) => {
-      if (!ipfsURL) return
-      ipfsURL = ipfsURL.split('://')
-      return 'https://ipfs.io/ipfs/' + ipfsURL[1]
-    }
-
-    const getMetadata = async () => {
-      let data = await fetch(`https://ipfs.io/ipfs/${recipeId}/metadata.json`)
-      data = await data.json()
-      const dataArray = data.description.split(',')
-      data.creator = dataArray[0]
-      data.type = dataArray[1]
-      data.intro = dataArray[2]
-      data.image = getImage(data.image)
-      data.ingredients = [
-        '10 large shrimp, heads off and unpeeled',
-        '1 tablespoon olive oil',
-        '3 cloves garlic, minced',
-        '4 tablespoons butter',
-        '½ teaspoon dried oregano',
-        'Add salt to taste',
-      ]
-      data.Prep = '15 mins'
-      data.Cook = '10 mins'
-      data.Total = '25 mins'
-      data.Servings = '4 servings'
-      data.Directions = [
-        'With a sharp knife, cut shrimp in half so that the meat is exposed in the shell.',
-        ' In a small saucepan, heat olive oil and lightly fry the garlic until just softened. Add butter and Oregano. Heat until butter has melted.',
-        'Preheat an outdoor grill for medium heat and lightly oil grate.',
-        'Lay shrimp out on a tray and brush generously with the butter mixture. Grill shrimp until lightly golden.',
-      ]
-      setRecipe(data)
-    }
-    if (recipeId) {
-      getMetadata()
-      getImage()
-    }
-  }, [recipeId, contractData])
 
   const handleChange = (event) => {
     setComment(event.target.value)
   }
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    const newObj = { author: 'Guest', content: comment }
-    const commentArr = [...pet.comments, newObj]
-    pet.comments = [...pet.comments, newObj]
-    setComment('')
-  }
-
-  let pet = {}
-  if (!recipeId) {
-    pet = {
-      name: 'Oliver',
-      img: 'https://siasky.net/OADaRfw_nMqqXCz5NXXLq5xN6R3nScEKbzsRdqdEQrLL5A',
-      type: 'Cat',
-      Owner: 'Luis C',
-      likes: 20,
-      comments: [
-        { author: 'Albert', content: 'This is awesome' },
-        { author: 'Angie', content: 'So Cute~' },
-      ],
-    }
-  }
-
   const mintNFT = async () => {
-    console.log('recipe.image', recipe.image)
+    console.log(
+      'contractData.id._hex == ',
+      selectedItem.contractData.id.toString(),
+    )
     try {
-      const data = await contractData.methods
-        .mintNFT(recipe.image)
-        .send({ from: account })
-      console.log('data', data)
-      setCodeHash(data)
+      const curItemID = selectedItem.contractData.id.toString()
+      const res = await contract.buyCampus(curItemID)
+      console.log('MINT res', res)
     } catch (err) {
       console.error(err)
     }
-  }
-
-  const checkout = () => {
-    window.unlockProtocol && window.unlockProtocol.loadCheckoutModal()
-    window.addEventListener('unlockProtocol.status', function (event) {
-      if (event.detail.state === 'unlocked') {
-        alert('Worked!')
-        setUnlock(true)
-      }
-    })
-  }
-
-  const [checked, setChecked] = React.useState(true)
-
-  const handleCheckBox = (event) => {
-    setChecked(event.target.checked)
   }
 
   return (
@@ -143,19 +49,41 @@ function ItemDetails({ account, contractData, selectedItem }) {
         <div className="">
           <Grid container spacing={6}>
             <Grid item xs={12} sm={6} className="grid-container">
-              <Button
-                variant="contained"
-                className="wallet-btn"
-                color="primary"
-                // onClick={mintNFT}
-              >
-                Buy now
-              </Button>
+              {selectedItem.contractData.isSold ? (
+                <Button
+                  variant="contained"
+                  className="wallet-btn"
+                  color="primary"
+                >
+                  Sold
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  className="wallet-btn"
+                  color="primary"
+                  onClick={mintNFT}
+                >
+                  Buy now
+                </Button>
+              )}
+              <WorldIDWidget
+                actionId="wid_BPZsRJANxct2cZxVRyh80SFG" // obtain this from developer.worldcoin.org
+                signal="my_signal"
+                enableTelemetry
+                onSuccess={(verificationResponse) =>
+                  console.log(verificationResponse)
+                } // you'll actually want to pass the proof to the API or your smart contract
+                onError={(error) => console.error(error)}
+              />
               <br />
               <div style={{ textAling: 'center' }}></div>
-
               <center>
-                <img className="img" src={selectedItem.image1} alt="pet" />
+                <img
+                  className="img"
+                  src={selectedItem.image ? selectedItem.image : imageHolder}
+                  alt="pet"
+                />
                 <div className="flex-container">
                   <div>
                     <IconButton aria-label="add to favorites">
@@ -167,7 +95,6 @@ function ItemDetails({ account, contractData, selectedItem }) {
                   </IconButton>
                 </div>
               </center>
-
               <div className="specifications">
                 <h2 style={{ margin: '3px' }}>Description</h2>
                 <Typography

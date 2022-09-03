@@ -9,17 +9,18 @@ import homebottom from '../../../images/homebottom.png'
 import { Grid, Container, Card } from '@material-ui/core'
 import './Gallery.css'
 
-function Gallery({ setSelectedItem, contract }) {
+function MyHome({ setSelectedItem, contract }) {
   return (
     <div
       style={{
         minHeight: '70vh',
         paddingBottom: '3rem',
+        paddingTop: '3rem',
       }}
     >
       <Container>
         {/* Home Header */}
-        {/* <Container>
+        <Container>
           <div className="root">
             <Grid
               container
@@ -47,7 +48,7 @@ function Gallery({ setSelectedItem, contract }) {
             </Grid>
             <img src={homebottom} className="logo-hero" alt="logo-hero" />
           </div>
-        </Container> */}
+        </Container>
 
         {/* search */}
         {/* <form className="search-form">
@@ -61,11 +62,11 @@ function Gallery({ setSelectedItem, contract }) {
             <span className="search-clear">Clear</span>
             <span className="search-icon">🔍</span>
           </div>
-        </form> */}
+        </form>
 
-        <br />
+        <br /> */}
         {/* Profiles */}
-        <Card
+        {/* <Card
           style={{
             borderRadius: '24px',
             paddingTop: '1rem',
@@ -75,10 +76,10 @@ function Gallery({ setSelectedItem, contract }) {
           }}
         >
           <ItemList setSelectedProfile={setSelectedItem} contract={contract} />
-        </Card>
+        </Card> */}
       </Container>
     </div>
   )
 }
 
-export default Gallery
+export default MyHome

@@ -40,22 +40,7 @@ function CreateItem({
   const handleImage = async (event) => {
     setImageName(event.target.files[0].name)
     setImageType(event.target.files[0].type)
-    const updataData = new FormData()
-    updataData.append('file', event.target.files[0])
-    const res = await axios.post(
-      'https://api.pinata.cloud/pinning/pinFileToIPFS',
-      updataData,
-      {
-        maxContentLength: 'Infinity',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          pinata_api_key: '309d3c624b4ce20cea2b',
-          pinata_secret_api_key:
-            'a743aec5905097d38724b5daab66f9c206b0b3ef2d01ecccbe79cd2f0e15d026',
-        },
-      },
-    )
-    setImage1('https://gateway.pinata.cloud/ipfs/' + res.data.IpfsHash)
+    setImage1(event.target.files[0])
   }
 
   const handleCoverPhoto = async (event) => {
@@ -117,7 +102,7 @@ function CreateItem({
                 top: '0',
                 left: '0',
               }}
-              src={image1 ? image1 : Rectangle}
+              src={image1 ? URL.createObjectURL(image1) : Rectangle}
               alt="userBGimage"
             />
 

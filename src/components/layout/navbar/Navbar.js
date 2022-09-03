@@ -17,7 +17,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications'
 import MoreIcon from '@material-ui/icons/MoreVert'
 import { StylesProvider } from '@material-ui/core/styles'
 import './Navbar.css'
-import logo from '../../../images/mylogo.png'
+import logo from '../../../images/logo_Official.png'
 
 export const Navbar = ({ walletAddress, disconnectWallet, connectWallet }) => {
   const [anchorEl, setAnchorEl] = useState(null)
@@ -112,16 +112,25 @@ export const Navbar = ({ walletAddress, disconnectWallet, connectWallet }) => {
             <div className="grow" />
             <div className="sectionDesktop">
               <Button className="whiteLink" component={Link} to="/">
-                Marketplace
+                Home
               </Button>
-              <Button className="whiteLink" component={Link} to="/sell-item">
-                Sell Item
-              </Button>
-              <Button className="whiteLink" component={Link} to="/">
-                Fundraiser
-              </Button>
+
               {walletAddress ? (
                 <>
+                  <Button
+                    className="whiteLink"
+                    component={Link}
+                    to="/marketplace"
+                  >
+                    Marketplace
+                  </Button>
+                  <Button
+                    className="whiteLink"
+                    component={Link}
+                    to="/sell-item"
+                  >
+                    Sell Item
+                  </Button>
                   <Button
                     variant="contained"
                     color="secondary"

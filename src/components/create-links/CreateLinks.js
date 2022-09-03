@@ -15,7 +15,6 @@ import { NFTStorage, File } from 'nft.storage'
 
 function CreateLinks({
   image1,
-  image2,
   title,
   description,
   category,
@@ -30,31 +29,55 @@ function CreateLinks({
   walletAddress,
   contract,
 }) {
+  console.log('ONCREATE contract', contract)
   const history = useHistory()
-  const [cdn, setCdn] = useState('')
   const coditionTypeRef = React.createRef()
   const [loading, setLoading] = useState(false)
 
-  // console.log('MY  linkArray')
-  // const [description, setDescription] = useState('')
-  // const [url, setUrl] = useState('')
+  const getTime = () => {
+    let date = new Date()
+    let options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }
+    return date.toLocaleTimeString('en-us', options)
+  }
 
   const saveToNFTStorage = async () => {
-    console.log('?? imgToSave', image1)
+    const created = getTime()
     try {
       setLoading(true)
       const client = new NFTStorage({ token: apiKey })
+
+      const obj = {
+        description,
+        category,
+        price,
+        condition,
+        retailPrice,
+        location,
+        walletAddress,
+        created,
+      }
+
+      console.log('WHAT obj', obj)
+
       const metadata = await client.store({
         name: title,
-        description: `${description},$,${category},$,${price},$,${condition},$,${retailPrice},$,${location},$,${image1},$,${walletAddress}`,
+        description: JSON.stringify(obj),
         image: new File([image1], 'imageName', { type: 'image/*' }),
       })
       if (metadata) {
-        console.log('MYmetadata', metadata.data)
-        let urlPartStorage = metadata.data.image.pathname
-        urlPartStorage = urlPartStorage.substring(2)
-        const imgUrl = `https://cloudflare-ipfs.com/ipfs/${urlPartStorage}`
-        console.log('Result imgUrl', imgUrl)
+        console.log('metadata', metadata)
+        console.log('metadata.data', metadata.data)
+        let metaData = metadata.url.substring(7)
+        const getDatUrl = `https://cloudflare-ipfs.com/ipfs/${metaData}`
+        console.log(' getDatUrl', getDatUrl)
+        await contract.createCampus(getDatUrl, price)
         setLoading(false)
         history.push('/')
       }
@@ -62,35 +85,6 @@ function CreateLinks({
       console.log(error)
     }
   }
-
-  // const save = async (linksArray) => {
-  //   let user_name = username ? username : 'electrone'
-  //   let avatar = image ? image : 'https://i.imgur.com/62G0yQ0.jpeg'
-  //   let banner = coverPhoto ? coverPhoto : 'https://i.imgur.com/62G0yQ0.jpeg'
-
-  //   let bio_ = bio
-  //     ? bio
-  //     : 'I am a software developer who enjoys web and mobile development through universal components. By day I love to code and drinking tea. At night I sleep.'
-  //   let links = linksArray
-  //     ? linksArray
-  //     : [
-  //         [
-  //           'Website',
-  //           'https://transak.gitbook.io/transak-docs/quick-guides/setting-up-a-quick-demo-integration',
-  //         ],
-  //       ]
-  //   let address = currentAccount
-  //     ? currentAccount
-  //     : '0x891352608735f630AF999ba572fd57511137e758'
-
-  //   console.warn(address, user_name, avatar, banner, bio_, links)
-
-  //   // await res.wait()
-  //   // console.log(res)
-  //   // setLoading(false)
-  //   // history.push('/')
-  // }
-
   return (
     <StylesProvider injectFirst>
       <Container

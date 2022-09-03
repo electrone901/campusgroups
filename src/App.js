@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import './App.css'
+import MyHome from './components/home-container/gallery/MyHome'
 import { Navbar } from './components/layout/navbar/Navbar'
 import Footer from './components/layout/footer/Footer'
 import Home from './components/home-container/home/Home'
@@ -9,6 +10,7 @@ import CreatePet from './components/create-post/CreatePet'
 import Web3Modal from 'web3modal'
 import CreateLinks from './components/create-links/CreateLinks'
 import { CONTRACTADDRESS, ABI } from './contractData'
+
 const { ethers } = require('ethers')
 
 function App() {
@@ -65,9 +67,13 @@ function App() {
           connectWallet={connectWallet}
         />
         <Route exact path="/">
+          <MyHome />
+        </Route>
+        <Route exact path="/marketplace">
           <Home
             setSelectedItem={setSelectedItem}
             walletAddress={walletAddress}
+            contract={contract}
           />
         </Route>
 
@@ -109,7 +115,7 @@ function App() {
           </Route>
 
           <Route path="/details/:itemId">
-            <ItemDetails selectedItem={selectedItem} />
+            <ItemDetails selectedItem={selectedItem} contract={contract} />
           </Route>
         </Switch>
         <Footer />

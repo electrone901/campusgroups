@@ -3,80 +3,69 @@ import { useHistory } from 'react-router-dom'
 import './ItemList.css'
 import {
   Typography,
-  Button,
-  IconButton,
   Grid,
   Card,
   CardMedia,
   CardContent,
 } from '@material-ui/core'
 import imageHolder from '../../../../images/imageHolder.jpg'
-
-import { apiKey } from '../../../APIKEYS'
 import CircularStatic from '../../../commons/CircularProgressWithLabel'
 
-function ItemList({ account, contractData, setSelectedProfile }) {
+function ItemList({ account, contract, setSelectedProfile }) {
+  console.log('hereet', contract)
   const [loading, setLoading] = useState(false)
   const history = useHistory()
-  const [profiles, setProfiles] = useState([])
   const [data, setData] = useState([])
-  console.log('🚀 ~ file: ItemList.js ~ line 22 ~ ItemList ~ data', data)
+
+  const getImage = (ipfsURL) => {
+    if (!ipfsURL) return
+    ipfsURL = ipfsURL.split('://')
+    return 'https://ipfs.io/ipfs/' + ipfsURL[1]
+  }
 
   useEffect(() => {
+    const tempItems = []
     const loadsData = async () => {
       try {
         setLoading(true)
-        let cids = await fetch('https://api.nft.storage', {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
-        cids = await cids.json()
-        const temp = []
-        for (let cid of cids.value) {
-          if (cid?.cid) {
-            let data = await fetch(
-              `https://ipfs.io/ipfs/${cid.cid}/metadata.json`,
-            )
-            data = await data.json()
-            let descriptionArr = data.description.split(',$,')
 
-            // ${description},$,${category},$,${price},$,${condition},$,${retailPrice},$,${location},$,${image1},$,${image2},$,${walletAddress}
-            //  0: "des"
-            // 1: "Home Goods "
-            // 2: "10"
-            // 3: "New"
-            // 4: "97"
-            // 5: "New York"
-            // 6: "https://gateway.pinata.cloud/ipfs/QmVgWUJnJYvUofb64vML7JCStKpH8JPGuB2MGyNRLP5f4T"
-            // 7: ""
-            // 8: ""
-            // 9: "null"
-            data.description = descriptionArr[0]
-            data.category = descriptionArr[1]
-            data.price = descriptionArr[2]
-            data.condition = descriptionArr[3]
-            data.retailPrice = descriptionArr[4]
-            data.location = descriptionArr[5]
-            data.image1 = descriptionArr[6]
-            data.walletAddress = descriptionArr[7]
-
-            console.log('+++++ descriptionArr', descriptionArr)
-
-            const getImage = (ipfsURL) => {
-              if (!ipfsURL) return
-              ipfsURL = ipfsURL.split('://')
-              return 'https://ipfs.io/ipfs/' + ipfsURL[1]
-            }
-            data.myImage = await getImage(data.image)
-            data.cid = cid.cid
-            data.created = cid.created
-            console.log('COMPLETED DATA data', data)
-            temp.push(data)
+        console.log('testtt')
+        // returns a number of  all ids from smaart contract
+        const itemsLengthSC = await contract._ids()
+        console.log(
+          '🚀 ~ file: ItemList.js ~ line 33 ~ loadsData ~ itemsLengthSC',
+          itemsLengthSC,
+        )
+        for (let i = 2; i <= itemsLengthSC; i++) {
+          // thelist is list of campus from SC
+          let item = await contract.thelist(i)
+          // creating new obj, will hold all data & push it to tempItems
+          let curObj = {
+            contractData: item,
           }
+
+          //  use to get metadata from IPFS
+          const cid = item.cid
+
+          //  get data from IPFS using cid
+          let res = await fetch(cid)
+          res = await res.json()
+          // converts string to obj
+          let description = JSON.parse(res.description)
+          // assembling curObj
+          curObj.description = description.description
+          curObj.category = description.category
+          curObj.price = description.price
+          curObj.condition = description.condition
+          curObj.retailPrice = description.retailPrice
+          curObj.location = description.location
+          curObj.walletAddress = description.walletAddress
+          curObj.created = description.created
+          curObj.image = getImage(res.image)
+          curObj.name = res.name
+          tempItems.push(curObj)
         }
-        setData(temp)
+        setData(tempItems)
         setLoading(false)
       } catch (error) {
         console.log(error)
@@ -84,10 +73,9 @@ function ItemList({ account, contractData, setSelectedProfile }) {
       }
     }
     loadsData()
-  }, [])
+  }, [contract])
 
   const details = (profile) => {
-    console.log('here profile', profile.cid)
     localStorage.removeItem('selectedItem')
     localStorage.setItem('selectedItem', profile)
     setSelectedProfile(profile)
@@ -108,17 +96,20 @@ function ItemList({ account, contractData, setSelectedProfile }) {
                     <CardMedia
                       component="img"
                       height="300"
-                      image={profile.image1 || imageHolder}
+                      image={profile.image || imageHolder}
                       alt="Profile"
                     />
                     <CardContent>
                       <Typography className="card-price">
                         ${profile.price ? profile.price : 'FREE'}
                       </Typography>
-                      <Typography color="#1C1A19" className="card-header-swap">
+                      <Typography
+                        color="#1C1A19"
+                        className="card-header-swap spacer"
+                      >
                         {profile.name || profile.username}
                       </Typography>
-                      <Typography className="card-location">
+                      <Typography className="card-location spacer">
                         {profile.location ? profile.location : 'New York City'}
                       </Typography>
                     </CardContent>

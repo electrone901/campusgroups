@@ -9,19 +9,28 @@ import {
   Typography,
 } from '@material-ui/core'
 import './Footer.css'
-import logo from '../../../images/logo.jpg'
+import logo from '../../../images/logo_Official.png'
 
 function Footer() {
   return (
     <StylesProvider injectFirst>
       <footer>
-        <AppBar className="primary-color marginT-3 pad-2" position="static">
+        <AppBar
+          className="primary-color marginT-3 pad-2"
+          position="static"
+          style={{ padding: '1rem' }}
+        >
           <Grid component={Container} container>
             <Grid item xs={12} sm={3}>
-              <img src={logo} alt="logo" className="footer-logo" />
+              {/* <img src={logo} alt="logo" style={{ width: '100%' }} /> */}
             </Grid>
 
             <Grid item xs={12} sm={9} className="links">
+              <Link className="link" component={RouterLink} to="/">
+                Home
+              </Link>
+              <span>/</span>
+
               <Link className="link" component={RouterLink} to="/">
                 Home
               </Link>
